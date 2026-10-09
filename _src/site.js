@@ -54,6 +54,8 @@ function sheetRows(csv) { // columns: date | end date | title | details | link
 // </sheet>
 const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD, local time
 const fmt = d => new Date(d + 'T00:00').toLocaleDateString('te-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+const day = d => +d.slice(8, 10);
+const month = d => new Date(d + 'T00:00').toLocaleDateString('te-IN', { month: 'long' });
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 const safeLink = l => /^(https?:\/\/|[\w-]+\.html$)/.test(l || '') ? l : ''; // sheet is editable by many people
 function renderUpdates(all) {
@@ -64,10 +66,13 @@ function renderUpdates(all) {
       .sort((a, b) => (a.date < b.date) === past ? 1 : -1);
     if (el.dataset.limit) list = list.slice(0, +el.dataset.limit);
     el.innerHTML = list.length ? list.map(u => `<article class="update">
-      ${safeLink(u.img) ? `<img src="${esc(u.img)}" alt="" loading="lazy">` : ''}
+      <div class="day" aria-hidden="true"><b>${day(u.date)}</b><span>${month(u.date)}</span></div>
+      <div>
       <time datetime="${u.date}">${fmt(u.date)}${u.end ? ' – ' + fmt(u.end) : ''}</time>
       <h3>${esc(u.title)}</h3>${u.text ? `<p>${esc(u.text)}</p>` : ''}
-      ${safeLink(u.link) ? `<a href="${esc(u.link)}"${u.link.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${esc(u.linkText || 'మరిన్ని వివరాలు →')}</a>` : ''}
+      ${safeLink(u.img) ? `<img src="${esc(u.img)}" alt="" loading="lazy">` : ''}
+      ${safeLink(u.link) ? `<a href="${esc(u.link)}"${u.link.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}>${esc(u.linkText || 'మరిన్ని వివరాలు')}</a>` : ''}
+      </div>
     </article>`).join('') : `<p class="empty">${el.dataset.empty || ''}</p>`;
   });
 }
